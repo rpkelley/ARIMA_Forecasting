@@ -5,7 +5,7 @@ output: pdf_document
 
 # Introduction
 
-Put an introduction here . . . .
+ARIMA models are very popular in financial academic literature, particularly when examining long time series like commodity prices. Here, I use an ARIMA model in R as a demand forecasting tool.
 
 First we import some packages that we'll need later:
 
@@ -229,3 +229,30 @@ plot( Forecast.Manual.1 )
 ```
 
 The fan shows the forecast provided by our ARIMA model. The blue prediction line is relatively flat, despite the variation in the historical data. The forecast is clearly a naive model, but the example illustrates the process and the inspections necessary to calibrate an ARIMA model.
+
+# Improvements
+
+Now, without even backtesting it, we can probably guess that our prediction in the previous section was not a very good one. The manner in which it becomes immediately flat, given all the variation in the historical data, seems very suspicious.
+
+If we recall the manner in which we calibrated this model, however, it might make the reason for this a little more obvious. Recall that we used the deseasonalized counts in order to calibrate the model . . . in other words, the model that we calibrated and then used to predict with does not "see" any of the seasonality in the actual data.
+
+We could do this in two ways: first, we could go back to the original seasonal data. Or, alternatively (and what we will do here) is to allow for seasonality in the ARIMA model:
+
+```{r}
+New.Fit.With.Seasonality = auto.arima( Deasonalized.Counts , seasonal = TRUE )
+New.Fit.With.Seasonality
+```
+
+Here we take the very same deseasonalized data and fit it to a new (2,1,2) model. Now, we could go through the same manual validation process we went through earlier, but for our purposes here we'll just accept this automatically calibrated model and use it for our prediction:
+
+```{r}
+Forecast.Auto.Arima = forecast( New.Fit.With.Seasonality , h = 30 )
+
+plot( Forecast.Auto.Arima )
+```
+
+Interesting! We see some more seasonal variation in the prediction here, which is probably appropriate given the patterns in the historical time series.
+
+# Conclusion
+
+In conclusion, we have very briefly described how to use R in order to fit an ARIMA time series model, including manual investigation of model residuals and ACF/PACF plots. Finally, given a fully calibrated model, we demonstrated how to use an ARIMA model for demand forecasting.
